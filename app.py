@@ -5,7 +5,7 @@ import re
 
 app = Flask(__name__)
 
-SESSION_FILE = "session_file_loopstar154"
+SESSION_FILE = "loopstar154_session"
 INSTAGRAM_USERNAME = "loopstar154"
 INSTAGRAM_PASSWORD = "Starbuzz3@"
 
