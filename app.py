@@ -10,11 +10,11 @@ def create_instaloader_instance():
     user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
     L.context._session.headers["User-Agent"] = user_agent
 
-    # try:
-    #     L.context.load_session_from_file("loopstar154")
-    # except instaloader.exceptions.QueryReturnedNotFoundException:
-    #     L.context.login("loopstar154", "Starbuzz3@")
-    #     L.context.save_session_to_file()
+    try:
+        L.context.load_session_from_file("loopstar154")
+    except instaloader.exceptions.QueryReturnedNotFoundException:
+        L.context.login("loopstar154", "Starbuzz3@")
+        L.context.save_session_to_file()
 
     proxies = {
         'http': 'socks5://yoqytafd-6:2dng483b96qx@p.webshare.io:80',
