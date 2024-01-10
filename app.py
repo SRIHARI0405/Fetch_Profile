@@ -5,16 +5,24 @@ import re
 
 app = Flask(__name__)
 
+SESSION_FILE = "loopstar154"
+INSTAGRAM_USERNAME = "loopstar154"
+INSTAGRAM_PASSWORD = "Starbuzz3@"
+
+L = instaloader.Instaloader()
+
+
 def create_instaloader_instance():
-    L = instaloader.Instaloader()
     user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
     L.context._session.headers["User-Agent"] = user_agent
 
     try:
-        L.context.load_session_from_file("loopstar154")
+        with open(SESSION_FILE, 'rb') as session_file:
+            L.context.load_session_from_file(INSTAGRAM_USERNAME,session_file)
     except instaloader.exceptions.QueryReturnedNotFoundException:
-        L.context.login("loopstar154", "Starbuzz3@")
-        L.context.save_session_to_file()
+        L.context.login(INSTAGRAM_USERNAME, INSTAGRAM_PASSWORD)
+        with open(SESSION_FILE, 'wb') as session_file:
+            L.context.save_session_to_file(session_file)
 
     proxies = {
         'http': 'socks5://yoqytafd-6:2dng483b96qx@p.webshare.io:80',
@@ -25,8 +33,9 @@ def create_instaloader_instance():
     return L
 
 
+
 def calculate_engagement_rate(username, last_n_posts=10):
-    L = create_instaloader_instance()
+    # L = create_instaloader_instance()
     profile = instaloader.Profile.from_username(L.context, username)
     all_posts = list(profile.get_posts())
     total_number_of_posts = len(all_posts)
