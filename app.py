@@ -60,18 +60,16 @@ def create_instaloader_instance1():
     user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
     L.context._session.headers["User-Agent"] = user_agent
     try:
+        proxies = {
+            'http': 'socks5://yoqytafd-6:2dng483b96qx@p.webshare.io:80',
+            'https': 'socks5://yoqytafd-6:2dng483b96qx@p.webshare.io:80',
+            }
+        L.context._session.proxies.update(proxies)
         L.context.login(INSTAGRAM_USERNAME, INSTAGRAM_PASSWORD)
         with open('loopstar154_session1', 'wb') as f:
             L.context.save_session_to_file(f)
     except Exception as e:
         print(f"An error occurred: {e}")
-    
-    proxies = {
-        'http': 'socks5://yoqytafd-6:2dng483b96qx@p.webshare.io:80',
-        'https': 'socks5://yoqytafd-6:2dng483b96qx@p.webshare.io:80',
-    }
-    L.context._session.proxies.update(proxies)
-    return L
 
 
 
