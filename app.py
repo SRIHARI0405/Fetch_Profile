@@ -7,9 +7,9 @@ import re
 
 app = Flask(__name__)
 
-SESSION_FILE = "loopstar154_session1"
+SESSION_FILE = "loopstar154_session2"
 INSTAGRAM_USERNAME = "loopstar154"
-INSTAGRAM_PASSWORD = "Starbuzz3@"
+INSTAGRAM_PASSWORD = "Starbuzz4@"
 
 L = instaloader.Instaloader()
 
@@ -99,10 +99,12 @@ def calculate_engagement_rate(username, last_n_posts=10):
 
 def extract_phone_number(bio):
     phone_pattern = re.compile(r'\b\d+[-.\s]?\d+[-.\s]?\d+\b')
+    # phone_pattern = re.compile(r'\b\d{3}[-.\s]?\d{3}[-.\s]?\d{4}\b')
     phone_numbers = re.findall(phone_pattern, bio)
     return phone_numbers
 
 def extract_email(bio):
+    # email_pattern = re.compile(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b')
     email_pattern = re.compile(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b')
     email_matches = re.findall(email_pattern, bio)
     return email_matches[0] if email_matches else None
