@@ -7,7 +7,7 @@ import re
 
 app = Flask(__name__)
 
-SESSION_FILE = "loopstar154_session2"
+SESSION_FILE = "loopstar154_session3"
 INSTAGRAM_USERNAME = "loopstar154"
 INSTAGRAM_PASSWORD = "Starbuzz4@"
 
@@ -16,8 +16,8 @@ L = instaloader.Instaloader()
 
 
 def create_instaloader_instance():
-    user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
-    L.context._session.headers["User-Agent"] = user_agent
+    USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
+    L.user_agent = USER_AGENT  
 
     # try:
     #     with open(SESSION_FILE, 'rb') as session_file:
@@ -57,8 +57,8 @@ def create_instaloader_instance():
     return L
 
 def create_instaloader_instance1():
-    user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
-    L.context._session.headers["User-Agent"] = user_agent
+    USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
+    L.user_agent = USER_AGENT  
     try:
         proxies = {
             'http': 'socks5://yoqytafd-6:2dng483b96qx@p.webshare.io:80',
