@@ -9,7 +9,7 @@ import random
 
 app = Flask(__name__)
 
-SESSION_FILE = os.getenv('INSTA_SESSION_FILE', 'loopstar154_session6')
+SESSION_FILE = os.getenv('INSTA_SESSION_FILE', 'loopstar154_session7')
 INSTAGRAM_USERNAME = os.getenv('loopstar154')
 INSTAGRAM_PASSWORD = os.getenv('Starbuzz6@')
 HTTP_PROXY = os.getenv('socks5://yoqytafd-6:2dng483b96qx@p.webshare.io:80')
