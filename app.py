@@ -1,16 +1,18 @@
 from flask import Flask, jsonify, Response
 import json
 import instaloader
+import logging
 import os
 import re
 
 app = Flask(__name__)
 
-SESSION_FILE = "loopstar154_session1"
+SESSION_FILE = "loopstar154_ses"
 INSTAGRAM_USERNAME = "loopstar154"
 INSTAGRAM_PASSWORD = "Starbuzz3@"
 
 L = instaloader.Instaloader()
+
 
 
 def create_instaloader_instance():
@@ -25,23 +27,25 @@ def create_instaloader_instance():
     #     with open(SESSION_FILE, 'wb') as session_file:
     #         L.context.save_session_to_file(session_file)
 
+
     try:
         if os.path.exists(SESSION_FILE):
             with open(SESSION_FILE, 'rb') as session_file:
                 L.context.load_session_from_file(INSTAGRAM_USERNAME, session_file)
             
             if not L.context.is_logged_in:
+                logging.info("Logging in...")
                 L.context.login(INSTAGRAM_USERNAME, INSTAGRAM_PASSWORD)
+                logging.info("Logging Done")
                 with open(SESSION_FILE, 'wb') as session_file:
                     L.context.save_session_to_file(session_file)
+                    logging.info("logged the session")
         else:
             L.context.login(INSTAGRAM_USERNAME, INSTAGRAM_PASSWORD)
             with open(SESSION_FILE, 'wb') as session_file:
                 L.context.save_session_to_file(session_file)
-    except instaloader.exceptions.QueryReturnedNotFoundException as e:
-        print(f"QueryNotFoundException: {e}")
-    except instaloader.exceptions.InstaloaderException as e:
-        print(f"InstaloaderException: {e}")
+    except instaloader.exceptions.QueryReturnedNotFoundExceptionn as e:
+        logging.error(f"QueryNotFoundException: {e}")
 
 
     proxies = {
@@ -131,7 +135,10 @@ def get_instagram_profile(username):
             'message': f"An error occurred while fetching profile: {e}",
             'data': None
         }
+        if response:
+            create_instaloader_instance()
         return jsonify(response)
+
 
 if __name__ == '__main__':
     app.run(debug=True, port=5002)
