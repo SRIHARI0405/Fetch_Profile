@@ -7,17 +7,15 @@ import re
 
 app = Flask(__name__)
 
-SESSION_FILE = "loopstar154_session8"
+SESSION_FILE = "loopstar154_session10"
 INSTAGRAM_USERNAME = "loopstar154"
 INSTAGRAM_PASSWORD = "Starbuzz6@"
 
 L = instaloader.Instaloader()
-
-
-
 def create_instaloader_instance():
     USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
-    L.user_agent = USER_AGENT  
+    L.user_agent = USER_AGENT
+    L.context.request_timeout
 
     # try:
     #     with open(SESSION_FILE, 'rb') as session_file:
