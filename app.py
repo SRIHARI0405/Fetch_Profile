@@ -3,11 +3,13 @@ import json
 import instaloader
 import logging
 import os
+import time
+import random
 import re
 
 app = Flask(__name__)
 
-SESSION_FILE = "loopstar154_session10"
+SESSION_FILE = "loopstar154_session11"
 INSTAGRAM_USERNAME = "loopstar154"
 INSTAGRAM_PASSWORD = "Starbuzz6@"
 
@@ -15,7 +17,14 @@ L = instaloader.Instaloader()
 def create_instaloader_instance():
     USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
     L.user_agent = USER_AGENT
-    L.context.request_timeout
+    L.context.max_connection_attempts = 10
+    L.context.request_timeout = 86400
+    proxies = {
+            'http': 'socks5://yoqytafd-6:2dng483b96qx@p.webshare.io:80',
+            'https': 'socks5://yoqytafd-6:2dng483b96qx@p.webshare.io:80',
+    }
+    L.context._session.proxies.update(proxies)
+
 
     # try:
     #     with open(SESSION_FILE, 'rb') as session_file:
@@ -44,24 +53,17 @@ def create_instaloader_instance():
                 L.context.save_session_to_file(session_file)
     except instaloader.exceptions.QueryReturnedNotFoundException as e:
         logging.error(f"QueryNotFoundException: {e}")
-
-
-    proxies = {
-        'http': 'socks5://yoqytafd-6:2dng483b96qx@p.webshare.io:80',
-        'https': 'socks5://yoqytafd-6:2dng483b96qx@p.webshare.io:80',
-    }
-    L.context._session.proxies.update(proxies)
-
     return L
 
 def create_instaloader_instance1():
     USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
     INSTAGRAM_USERNAME = "loopstar154"
-    INSTAGRAM_PASSWORD = "Starbuzz4@"
+    INSTAGRAM_PASSWORD = "Starbuzz6@"
 
-    L1 = instaloader.Instaloader()
-    
+    L1 = instaloader.Instaloader()    
     L1.user_agent = USER_AGENT
+    L1.context.max_connection_attempts = 10
+    L1.context.request_timeout = 86400
 
     try:
         proxies = {
@@ -99,7 +101,8 @@ def calculate_engagement_rate(username, last_n_posts=10):
             engagement_rate = None
         else:
             engagement_rate = (total_interactions / number_post) / profile.followers * 100
-
+    
+    time.sleep(random.uniform(1, 3))
     return engagement_rate
 
 def extract_phone_number(bio):

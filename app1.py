@@ -9,9 +9,10 @@ INSTAGRAM_PASSWORD = "Starbuzz6@"
 # L.context._session.headers["User-Agent"] = user_agent
 
 try:
-    L.context.request_timeout = 3600
+    L.context.max_connection_attempts = 10
+    L.context.request_timeout = 86400
     L.context.login(INSTAGRAM_USERNAME, INSTAGRAM_PASSWORD)
-    with open('loopstar154_session10', 'wb') as f:
+    with open('loopstar154_session11', 'wb') as f:
         L.context.save_session_to_file(f)
 except Exception as e:
     print(f"An error occurred: {e}")
