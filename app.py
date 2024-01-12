@@ -12,12 +12,13 @@ app = Flask(__name__)
 SESSION_FILE = "loopstar154_session12"
 INSTAGRAM_USERNAME = "loopstar154"
 INSTAGRAM_PASSWORD = "Starbuzz6@"
+MAX_RETRIES = 3
 
 L = instaloader.Instaloader()
 def create_instaloader_instance():
     USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
     L.user_agent = USER_AGENT
-    
+
     proxies = {
             'http': 'socks5://yoqytafd-6:2dng483b96qx@p.webshare.io:80',
             'https': 'socks5://yoqytafd-6:2dng483b96qx@p.webshare.io:80',
@@ -118,50 +119,57 @@ def extract_email(bio):
 
 @app.route('/profile/<username>')
 def get_instagram_profile(username):
-    try:
-        L = create_instaloader_instance()
-        profile = instaloader.Profile.from_username(L.context, username)
-        engagement_rate = round(calculate_engagement_rate(username), 2)
-        
-        phone_number = extract_phone_number(profile.biography)
-        email = extract_email(profile.biography)
+    retry_count = 0
 
-        data = {
-            'username': profile.username,
-            'followees': profile.followees,
-            'followers': profile.followers,
-            'biography': profile.biography,
-            'full_name': profile.full_name,
-            'engagement_rate': engagement_rate,
-            'phone_number': phone_number,
-            'email': email
-        }
+    while retry_count < MAX_RETRIES:
+        try:
+            L = create_instaloader_instance()
+            profile = instaloader.Profile.from_username(L.context, username)
+            engagement_rate = round(calculate_engagement_rate(username), 2)
+            
+            phone_number = extract_phone_number(profile.biography)
+            email = extract_email(profile.biography)
 
-        response = {
-            'success': True,
-            'message': 'Data received successfully',
-            'data': data
-        }
-        json_data = json.dumps(response, ensure_ascii=False)
-        return Response(json_data, content_type='application/json; charset=utf-8')
+            data = {
+                'username': profile.username,
+                'followees': profile.followees,
+                'followers': profile.followers,
+                'biography': profile.biography,
+                'full_name': profile.full_name,
+                'engagement_rate': engagement_rate,
+                'phone_number': phone_number,
+                'email': email
+            }
 
-    except instaloader.exceptions.ProfileNotExistsException:
-        response = {
-            'success': False,
-            'message': 'Profile not found',
-            'data': None
-        }
-        return jsonify(response)
+            response = {
+                'success': True,
+                'message': 'Data received successfully',
+                'data': data
+            }
+            json_data = json.dumps(response, ensure_ascii=False)
+            return Response(json_data, content_type='application/json; charset=utf-8')
 
-    except Exception as e:
-        response = {
-            'success': False,
-            'message': f"An error occurred while fetching profile: {e}",
-            'data': None
-        }
-        if response:
-            create_instaloader_instance1()
-        return jsonify(response)
+        except instaloader.exceptions.ProfileNotExistsException:
+            response = {
+                'success': False,
+                'message': 'Profile not found',
+                'data': None
+            }
+            return jsonify(response)
+
+        except Exception as e:
+            logging.error(f"An error occurred while fetching profile: {e}")
+            retry_count += 1
+            wait_time = 2 ** retry_count  # Exponential backoff: 2^1, 2^2, 2^3, ...
+            time.sleep(wait_time)
+    
+    response = {
+        'success': False,
+        'message': 'Max retries reached. Unable to fetch profile.',
+        'data': None
+    }
+    return jsonify(response)
+
 
 
 if __name__ == '__main__':
