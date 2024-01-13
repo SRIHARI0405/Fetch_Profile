@@ -73,7 +73,7 @@ def extract_phone_number(bio):
 def extract_email(bio):
     email_pattern = re.compile(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b')
     email_matches = re.findall(email_pattern, bio)
-    return email_matches[0] if email_matches else None
+    return email_matches
 
 @app.route('/profile/<accountname>')
 def get_profile(accountname):
