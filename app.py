@@ -1,168 +1,125 @@
+import time
 from flask import Flask, jsonify, Response
 import json
-import instaloader
-import logging
-import os
-import time
-import random
-import re
+from instagrapi import Client
+from instagrapi.types import User
+import re  
 
 app = Flask(__name__)
 
-SESSION_FILE = "loopstar154_session12"
-INSTAGRAM_USERNAME = "loopstar154"
-INSTAGRAM_PASSWORD = "Starbuzz6@"
-MAX_RETRIES = 3
+# Load Instagram credentials from a secure location (e.g., environment variables)
+INSTAGRAM_USERNAME = 'loopstar154'
+INSTAGRAM_PASSWORD = 'Starbuzz6@'
 
-L = instaloader.Instaloader()
-def create_instaloader_instance():
-    USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
-    L.user_agent = USER_AGENT
+# Initialize Instagram client
+proxy = "socks5://yoqytafd-6:2dng483b96qx@p.webshare.io:80"
+cl = Client(proxy=proxy)
 
-    proxies = {
-            'http': 'socks5://yoqytafd-6:2dng483b96qx@p.webshare.io:80',
-            'https': 'socks5://yoqytafd-6:2dng483b96qx@p.webshare.io:80',
-    }
-    L.context._session.proxies.update(proxies)
+try:
+    cl.load_settings('session-loop.json')
+    cl.login(INSTAGRAM_USERNAME, INSTAGRAM_PASSWORD)
+except Exception as e:
+    print(f"Instagram login failed: {e}")
 
-
-    # try:
-    #     with open(SESSION_FILE, 'rb') as session_file:
-    #         L.context.load_session_from_file(INSTAGRAM_USERNAME,session_file)
-    # except instaloader.exceptions.QueryReturnedNotFoundException:
-    #     L.context.login(INSTAGRAM_USERNAME, INSTAGRAM_PASSWORD)
-    #     with open(SESSION_FILE, 'wb') as session_file:
-    #         L.context.save_session_to_file(session_file)
-
-
-    try:
-        if os.path.exists(SESSION_FILE):
-            with open(SESSION_FILE, 'rb') as session_file:
-                L.context.load_session_from_file(INSTAGRAM_USERNAME, session_file)
-            
-            if not L.context.is_logged_in:
-                logging.info("Logging in...")
-                L.context.login(INSTAGRAM_USERNAME, INSTAGRAM_PASSWORD)
-                logging.info("Logging Done")
-                with open(SESSION_FILE, 'wb') as session_file:
-                    L.context.save_session_to_file(session_file)
-                    logging.info("logged the session")
-        else:
-            L.context.login(INSTAGRAM_USERNAME, INSTAGRAM_PASSWORD)
-            with open(SESSION_FILE, 'wb') as session_file:
-                L.context.save_session_to_file(session_file)
-    except instaloader.exceptions.QueryReturnedNotFoundException as e:
-        logging.error(f"QueryNotFoundException: {e}")
-    return L
-
-def create_instaloader_instance1():
-    USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
-    INSTAGRAM_USERNAME = "loopstar154"
-    INSTAGRAM_PASSWORD = "Starbuzz6@"
-
-    L1 = instaloader.Instaloader()    
-    L1.user_agent = USER_AGENT
-    L1.context.max_connection_attempts = 10
-    L1.context.request_timeout = 86400
-
-    try:
-        proxies = {
-            'http': 'socks5://yoqytafd-6:2dng483b96qx@p.webshare.io:80',
-            'https': 'socks5://yoqytafd-6:2dng483b96qx@p.webshare.io:80',
-        }
-        L1.context._session.proxies.update(proxies)
-
-        L1.context.login(INSTAGRAM_USERNAME, INSTAGRAM_PASSWORD)
-
-        L1.save_session_to_file('loopstar154_session4')
-    except Exception as e:
-        print(f"An error occurred: {e}")
-
-
-
-def calculate_engagement_rate(username, last_n_posts=10):
-    # L = create_instaloader_instance()
-    profile = instaloader.Profile.from_username(L.context, username)
-    all_posts = list(profile.get_posts())
-    total_number_of_posts = len(all_posts)
-    number_post = min(last_n_posts, total_number_of_posts)
-
-    if number_post == 0:
-        engagement_rate = 0.0
-    else:
-        posts_consider = all_posts[:number_post]
-
-        total_likes = sum(post.likes for post in posts_consider)
-        total_comments = sum(post.comments for post in posts_consider)
-
-        total_interactions = total_likes + total_comments
-
-        if profile.followers == 0:
-            engagement_rate = None
-        else:
-            engagement_rate = (total_interactions / number_post) / profile.followers * 100
+# def calculate_engagement_rate(username, last_n_posts=10):
+#   user_id = cl.user_id_from_username(username)
+#   posts = cl.user_medias(user_id)
+#   total_likes = 0
+#   total_comments = 0
+#   post_count = min(last_n_posts, len(posts))
+#   for post in posts[:post_count]:
+#     total_likes += post['like_count']
+#     total_comments += post['comment_count']
     
-    time.sleep(random.uniform(1, 3))
-    return engagement_rate
+#     total_interactions = total_likes + total_comments
+#     user_info = cl.user_info_by_username(username)
+#     followers_count = user_info['user']['follower_count']
+
+#     if followers_count == 0 or post_count == 0:
+#       engagement_rate = None
+#     else:
+#       engagement_rate = (total_interactions / post_count) / followers_count * 100
+#       time.sleep(1)  
+#       return engagement_rate
+
+
+
+def extract_user_data(user: User):
+    phone_numbers = extract_phone_number(user.biography)
+    email = extract_email(user.biography)
+    # engagement_rate = calculate_engagement_rate(user.username)
+
+    return {
+        'username': user.username,
+        'full_name': user.full_name,
+        'media_count': user.media_count,
+        'follower_count': user.follower_count,
+        'following_count': user.following_count,
+        'biography': user.biography,
+        # 'engagement_rate': engagement_rate,
+        # 'public_email': user.public_email,
+        # 'contact_phone_number': user.contact_phone_number,
+        'phone_number': phone_numbers,
+        'email': email,
+    }
+
 
 def extract_phone_number(bio):
+    # phone_pattern = re.compile(r'\b(?<!\d)(?!\d{4}-\d{2}\b)\+?\d+(\s?\d+[-.\s]?\d+)?\b(?!-?\d)')
     phone_pattern = re.compile(r'\b\d+[-.\s]?\d+[-.\s]?\d+\b')
-    # phone_pattern = re.compile(r'\b\d{3}[-.\s]?\d{3}[-.\s]?\d{4}\b')
     phone_numbers = re.findall(phone_pattern, bio)
     return phone_numbers
 
 def extract_email(bio):
-    # email_pattern = re.compile(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b')
     email_pattern = re.compile(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b')
     email_matches = re.findall(email_pattern, bio)
     return email_matches[0] if email_matches else None
 
-@app.route('/profile/<username>')
-def get_instagram_profile(username):
-    retry_count = 0
+@app.route('/profile/<accountname>')
+def get_profile(accountname):
+    max_retries = 3
+    retry_delay = 5
 
-    while retry_count < MAX_RETRIES:
+    for retry_number in range(1, max_retries + 1):
         try:
-            L = create_instaloader_instance()
-            profile = instaloader.Profile.from_username(L.context, username)
-            engagement_rate = round(calculate_engagement_rate(username), 2)
-            
-            phone_number = extract_phone_number(profile.biography)
-            email = extract_email(profile.biography)
+            profile_info = cl.user_info_by_username(accountname)
+            if profile_info is not None:
+                data = extract_user_data(profile_info)
+                
+                # Extract phone number and email from biography
+                phone_numbers = extract_phone_number(data['biography'])
+                email = extract_email(data['biography'])
 
-            data = {
-                'username': profile.username,
-                'followees': profile.followees,
-                'followers': profile.followers,
-                'biography': profile.biography,
-                'full_name': profile.full_name,
-                'engagement_rate': engagement_rate,
-                'phone_number': phone_number,
-                'email': email
-            }
+                # Add phone number and email to the response data
+                data['phone_number'] = phone_numbers
+                data['email'] = email
 
-            response = {
-                'success': True,
-                'message': 'Data received successfully',
-                'data': data
-            }
-            json_data = json.dumps(response, ensure_ascii=False)
-            return Response(json_data, content_type='application/json; charset=utf-8')
-
-        except instaloader.exceptions.ProfileNotExistsException:
-            response = {
-                'success': False,
-                'message': 'Profile not found',
-                'data': None
-            }
-            return jsonify(response)
-
+                response = {
+                    'success': True,
+                    'message': 'Data retrieved successfully',
+                    'data': data
+                }
+                json_data = json.dumps(response, ensure_ascii=False)
+                return Response(json_data, content_type='application/json; charset=utf-8')
+            else:
+                response = {
+                    'success': False,
+                    'message': 'Profile not found',
+                    'data': None
+                }
+                return jsonify(response)
         except Exception as e:
-            logging.error(f"An error occurred while fetching profile: {e}")
-            retry_count += 1
-            wait_time = 2 ** retry_count  # Exponential backoff: 2^1, 2^2, 2^3, ...
-            time.sleep(wait_time)
-    
+            if "429" in str(e):
+                print(f"Rate limit exceeded. Retrying in {retry_delay} seconds (Retry {retry_number}/{max_retries}).")
+                time.sleep(retry_delay)
+            else:
+                response = {
+                    'success': False,
+                    'message': f"An error occurred while fetching profile: {e}",
+                    'data': None
+                }
+                return jsonify(response)
+
     response = {
         'success': False,
         'message': 'Max retries reached. Unable to fetch profile.',
@@ -170,7 +127,5 @@ def get_instagram_profile(username):
     }
     return jsonify(response)
 
-
-
 if __name__ == '__main__':
-    app.run(debug=True, port=5002)
+    app.run(debug=False)
